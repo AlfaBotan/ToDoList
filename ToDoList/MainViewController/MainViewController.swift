@@ -9,7 +9,6 @@ import UIKit
 
 final class MainViewController: UIViewController {
     
-    //MARK: UI Elements
     private lazy var titleLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -85,12 +84,20 @@ final class MainViewController: UIViewController {
         return countTaskLabel
     }()
     
-    private var countTask = 10
+    private var countTask: [Task] = []
+    private let toDoLoadService = ToDoLoadService.shared
+    private let coreDataMadager = CoreDataManager.shared
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        coreDataMadager.delegate = self
+        coreDataMadager.configureFetchedResultsController()
+        
         setUpUIElements()
         setUpConstraints()
+        
+        loadData()
     }
     
     private func setUpUIElements() {
@@ -135,11 +142,26 @@ final class MainViewController: UIViewController {
             newTaskButton.topAnchor.constraint(equalTo: footerView.topAnchor)
         ])
     }
+    
+    private func loadData() {
+        toDoLoadService.fetchTodos { [weak self] result in
+            guard let self = self else {return}
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let toDo):
+                    print(toDo.count)
+                    toDo.forEach {self.coreDataMadager.saveTask(id: UUID(), title: "Без категории", details: $0.todo, date: Date.now, isDone: false)}
+                case .failure(let error):
+                    print("Не удалось загрузить данный из API ошибка: \(error)")
+                }
+            }
+        }
+    }
 }
 
 extension MainViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        countTask
+        countTask.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -147,14 +169,19 @@ extension MainViewController: UITableViewDataSource {
             assertionFailure("Не удалось выполнить приведение к EventAndHabitTableViewСеll")
             return UITableViewCell()
         }
-        
+        cell.configCell(data: countTask[indexPath.row])
         return cell
     }
-    
-    
 }
 
 extension MainViewController: UITableViewDelegate {
     
+}
+
+extension MainViewController: CoreDataManagerDelegate {
+    func didChangeData(_ data: [Task]) {
+        countTask = data
+        taskTableView.reloadData()
+    }
 }
 

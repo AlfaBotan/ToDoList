@@ -96,6 +96,21 @@ final class CustomTableViewCell: UITableViewCell {
         ])
     }
     
+    func configCell(data: Task) {
+        taskIsDone = data.isDone
+        let configuration = UIImage.SymbolConfiguration(pointSize: 25, weight: .regular, scale: .medium)
+        var image = UIImage(systemName: "circle", withConfiguration: configuration)
+        if taskIsDone {
+            image = UIImage(systemName: "checkmark.circle", withConfiguration: configuration)
+        } else {
+            image = UIImage(systemName: "circle", withConfiguration: configuration)
+        }
+        doneButton.setImage(image, for: .normal)
+        titleLabel.text = data.title
+        descriptionLabel.text = data.description
+        burnDateLabel.text = data.date.ISO8601Format()
+    }
+    
     @objc
     private func reverseDoneButtoneState() {
         let configuration = UIImage.SymbolConfiguration(pointSize: 25, weight: .regular, scale: .medium)
