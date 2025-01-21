@@ -48,7 +48,10 @@ final class MainViewController: UIViewController {
     private lazy var taskTableView: UITableView = {
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.backgroundColor = .green
+        tableView.register(CustomTableViewCell.self, forCellReuseIdentifier: CustomTableViewCell.identifer)
+        tableView.separatorColor = .gray
+        tableView.dataSource = self
+        tableView.delegate = self
         return tableView
     }()
     
@@ -82,7 +85,7 @@ final class MainViewController: UIViewController {
         return countTaskLabel
     }()
     
-    private var countTask = 1
+    private var countTask = 10
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -133,3 +136,25 @@ final class MainViewController: UIViewController {
         ])
     }
 }
+
+extension MainViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        countTask
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: CustomTableViewCell.identifer, for: indexPath) as? CustomTableViewCell else {
+            assertionFailure("Не удалось выполнить приведение к EventAndHabitTableViewСеll")
+            return UITableViewCell()
+        }
+        
+        return cell
+    }
+    
+    
+}
+
+extension MainViewController: UITableViewDelegate {
+    
+}
+
