@@ -73,11 +73,16 @@ final class MainViewController: UIViewController {
     private lazy var countTaskLabel: UILabel = {
         let countTaskLabel = UILabel()
         countTaskLabel.translatesAutoresizingMaskIntoConstraints = false
-        countTaskLabel.text = "7 Задач"
+        countTaskLabel.text = String.localizedStringWithFormat(
+            NSLocalizedString("numberOfTasks", comment: "подбор формы записи"),
+            countTask
+        )
         countTaskLabel.textColor = .white
         countTaskLabel.font = .systemFont(ofSize: 13, weight: .regular)
         return countTaskLabel
     }()
+    
+    private var countTask = 1
     
     override func viewDidLoad() {
         super.viewDidLoad()
