@@ -108,7 +108,7 @@ final class CustomTableViewCell: UITableViewCell {
         doneButton.setImage(image, for: .normal)
         titleLabel.text = data.title
         descriptionLabel.text = data.description
-        burnDateLabel.text = data.date.ISO8601Format()
+        burnDateLabel.text = DateFormatterManager.shared.dateFormatter.string(from: data.date)
     }
     
     @objc

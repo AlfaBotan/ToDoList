@@ -69,6 +69,7 @@ final class MainViewController: UIViewController {
         let image = UIImage(systemName: "square.and.pencil", withConfiguration: configuration)
         button.setImage(image, for: .normal)
         button.tintColor = .yellow
+        button.addTarget(self, action: #selector(newTaskButtonPress), for: .touchUpInside)
         return button
     }()
     
@@ -77,7 +78,7 @@ final class MainViewController: UIViewController {
         countTaskLabel.translatesAutoresizingMaskIntoConstraints = false
         countTaskLabel.text = String.localizedStringWithFormat(
             NSLocalizedString("numberOfTasks", comment: "подбор формы записи"),
-            countTask
+            countTask.count
         )
         countTaskLabel.textColor = .white
         countTaskLabel.font = .systemFont(ofSize: 13, weight: .regular)
@@ -97,7 +98,7 @@ final class MainViewController: UIViewController {
         setUpUIElements()
         setUpConstraints()
         
-        loadData()
+//        loadData()
     }
     
     private func setUpUIElements() {
@@ -157,6 +158,17 @@ final class MainViewController: UIViewController {
             }
         }
     }
+    
+    @objc
+    private func newTaskButtonPress() {
+        let viewController = CreateNewTaskViewController()
+        let backButton = UIBarButtonItem()
+        backButton.tintColor = .yellow
+        backButton.title = "Назад"
+        navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
+        navigationController?.pushViewController(viewController, animated: true)
+    }
+
 }
 
 extension MainViewController: UITableViewDataSource {
