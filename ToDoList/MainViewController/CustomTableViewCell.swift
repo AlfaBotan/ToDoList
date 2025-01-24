@@ -50,6 +50,7 @@ final class CustomTableViewCell: UITableViewCell {
     }()
     
     private var taskIsDone = false
+    private var id: UUID?
     
     static let identifer = "CustomTableViewCell"
     
@@ -63,6 +64,8 @@ final class CustomTableViewCell: UITableViewCell {
     }
     
     private func configureSubviews() {
+        let interction = UIContextMenuInteraction(delegate: self)
+        contentView.addInteraction(interction)
         [titleLabel,
          descriptionLabel,
          burnDateLabel,
@@ -98,6 +101,7 @@ final class CustomTableViewCell: UITableViewCell {
     
     func configCell(data: Task) {
         taskIsDone = data.isDone
+        id = data.id
         let configuration = UIImage.SymbolConfiguration(pointSize: 25, weight: .regular, scale: .medium)
         var image = UIImage(systemName: "circle", withConfiguration: configuration)
         if taskIsDone {
@@ -122,5 +126,33 @@ final class CustomTableViewCell: UITableViewCell {
         }
         taskIsDone.toggle()
         doneButton.setImage(image, for: .normal)
+    }
+}
+
+extension CustomTableViewCell: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        
+        
+        
+        let editAction = UIAction(title: "Редактировать", image: UIImage(systemName: "pencil")) { [weak self] _ in
+            guard let self = self,
+                  let id = self.id
+            else {return}
+            print("Редактировать задачу: \(id)")
+            
+        }
+        
+        let deleteAction = UIAction(title: "Удалить", image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self]_ in
+            
+            guard let self = self,
+                  let id = self.id
+            else {return}
+            print("Удалить задачу: \(id)")
+            CoreDataManager.shared.deleteTask(with: id)
+        }
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
+            return UIMenu(children: [editAction, deleteAction])
+        }
     }
 }

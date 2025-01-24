@@ -24,8 +24,8 @@ final class CoreDataManager: NSObject {
         let container = NSPersistentContainer(name: "ToDoList")
         container.loadPersistentStores { _, error in
             if let error = error as NSError? {
-                print("Unresolved error: \(error), \(error.userInfo)")
-                assertionFailure("Core Data stack setup failed")
+                print("ошибка: \(error), \(error.userInfo)")
+                assertionFailure("Не удалось настроить контейнер")
             }
         }
         return container
@@ -54,7 +54,7 @@ final class CoreDataManager: NSObject {
                 delegate?.didChangeData(result)
             }
         } catch {
-            print("Failed to fetch tasks: \(error.localizedDescription)")
+            print("Не удалось получить записи из базы данных: \(error.localizedDescription)")
         }
     }
         
@@ -69,9 +69,9 @@ final class CoreDataManager: NSObject {
             
             do {
                 try self?.context.save()
-                print("Task saved successfully")
+                print("Задача сохранена в базу данных")
             } catch {
-                print("Failed to save task: \(error.localizedDescription)")
+                print("Ошибка сохранения новой записи: \(error.localizedDescription)")
             }
         }
     }
@@ -81,19 +81,27 @@ final class CoreDataManager: NSObject {
             let tasks = try context.fetch(TaskCD.fetchRequest())
             return tasks
         } catch {
-            print("Failed to fetch tasks: \(error.localizedDescription)")
+            print("Не удалось получить записи из базы данных: \(error.localizedDescription)")
             return nil
         }
     }
     
-    func deleteTask(_ task: TaskCD) {
+    func deleteTask(with uuid: UUID) {
         context.perform { [weak self] in
-            self?.context.delete(task)
+            let fetchRequest: NSFetchRequest<TaskCD> = TaskCD.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "id == %@", uuid as CVarArg)
+            
             do {
-                try self?.context.save()
-                print("Task deleted successfully")
+                let tasks = try self?.context.fetch(fetchRequest)
+                if let taskToDelete = tasks?.first {
+                    self?.context.delete(taskToDelete)
+                    try self?.context.save()
+                    print("Запись успешно удалена")
+                } else {
+                    print("Записи с так UUID нет в базе")
+                }
             } catch {
-                print("Failed to delete task: \(error.localizedDescription)")
+                print("Ошибка при удаления записи: \(error.localizedDescription)")
             }
         }
     }
@@ -123,9 +131,9 @@ final class CoreDataManager: NSObject {
                 }
                 try self?.context.save()
                 UserDefaults.standard.set(false, forKey: "isDataLoaded")
-                print("All tasks deleted successfully")
+                print("База данных очищена")
             } catch {
-                print("Failed to delete all tasks: \(error.localizedDescription)")
+                print("Ошибка очистки базы данных: \(error.localizedDescription)")
             }
         }
     }
@@ -151,10 +159,10 @@ final class CoreDataManager: NSObject {
                     }
                     
                     try self?.context.save()
-                    print("Task updated successfully")
+                    print("Запись обновлена")
                 }
             } catch {
-                print("Failed to update task: \(error.localizedDescription)")
+                print("Ошибка редактирования записи: \(error.localizedDescription)")
             }
         }
     }

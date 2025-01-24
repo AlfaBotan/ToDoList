@@ -85,7 +85,9 @@ final class MainViewController: UIViewController {
         return countTaskLabel
     }()
     
+    private var blurView: UIVisualEffectView?
     private var countTask: [Task] = []
+    
     private let toDoLoadService = ToDoLoadService.shared
     private let coreDataMadager = CoreDataManager.shared
     
