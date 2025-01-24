@@ -132,14 +132,20 @@ final class CustomTableViewCell: UITableViewCell {
 extension CustomTableViewCell: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         
-        
-        
         let editAction = UIAction(title: "Редактировать", image: UIImage(systemName: "pencil")) { [weak self] _ in
             guard let self = self,
-                  let id = self.id
+                  let id = self.id,
+                  let title = self.titleLabel.text,
+                  let description = self.descriptionLabel.text
             else {return}
             print("Редактировать задачу: \(id)")
             
+        let editVC = CreateNewTaskViewController()
+            editVC.configVCForEditFlow(title: title, description: description, id: id)
+            
+            if let parentViewController = self.findViewController() {
+                parentViewController.navigationController?.pushViewController(editVC, animated: true)
+            }
         }
         
         let deleteAction = UIAction(title: "Удалить", image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self]_ in

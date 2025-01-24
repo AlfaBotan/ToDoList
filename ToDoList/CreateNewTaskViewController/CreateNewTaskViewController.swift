@@ -25,16 +25,7 @@ final class CreateNewTaskViewController: UIViewController {
         return textField
     }()
     
-    private lazy var descriptionTextField: UITextField = {
-        let textField = UITextField()
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.textColor = .white
-        textField.font = .systemFont(ofSize: 16, weight: .regular)
-        textField.borderStyle = .line
-        return textField
-    }()
-    
-    private lazy var textView: UITextView = {
+    private lazy var descriptionTextView: UITextView = {
         let textView = UITextView()
         textView.translatesAutoresizingMaskIntoConstraints = false
         textView.delegate = self
@@ -65,6 +56,7 @@ final class CreateNewTaskViewController: UIViewController {
     }()
     
     private let coreDataManager = CoreDataManager.shared
+    private var editTaskID: UUID?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -78,7 +70,7 @@ final class CreateNewTaskViewController: UIViewController {
         
         [titleTextField,
          dateLabel,
-         textView].forEach {view.addSubview($0) }
+         descriptionTextView].forEach {view.addSubview($0) }
     }
     
     private func setUpConstraints() {
@@ -93,17 +85,20 @@ final class CreateNewTaskViewController: UIViewController {
             dateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             dateLabel.heightAnchor.constraint(equalToConstant: 16),
             
-            textView.topAnchor.constraint(equalTo: dateLabel.bottomAnchor, constant: 16),
-            textView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            textView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            textView.heightAnchor.constraint(equalToConstant: 44)
+            descriptionTextView.topAnchor.constraint(equalTo: dateLabel.bottomAnchor, constant: 16),
+            descriptionTextView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            descriptionTextView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            descriptionTextView.heightAnchor.constraint(equalToConstant: 44)
         ])
     }
     
     @objc
     func saveNewTaskButtonPress() {
+        if let oldID = editTaskID {
+            coreDataManager.deleteTask(with: oldID)
+        }
         let title = titleTextField.text ?? "Без категории"
-        guard let description = textView.text else {return}
+        guard let description = descriptionTextView.text else {return}
         coreDataManager.saveTask(id: UUID(), title: title, details: description, date: Date.now, isDone: false)
         navigationController?.popViewController(animated: true)
     }
@@ -119,5 +114,13 @@ extension CreateNewTaskViewController: UITextViewDelegate {
         }
         
         rightBarButton.isEnabled = !textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+}
+
+extension CreateNewTaskViewController {
+    func configVCForEditFlow(title: String, description: String, id: UUID) {
+        titleTextField.text = title
+        descriptionTextView.text = description
+        editTaskID = id
     }
 }
