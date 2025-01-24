@@ -98,7 +98,8 @@ final class MainViewController: UIViewController {
         setUpUIElements()
         setUpConstraints()
         
-//        loadData()
+//        coreDataMadager.deleteAllTasks()
+        loadData()
     }
     
     private func setUpUIElements() {
@@ -145,15 +146,18 @@ final class MainViewController: UIViewController {
     }
     
     private func loadData() {
-        toDoLoadService.fetchTodos { [weak self] result in
-            guard let self = self else {return}
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let toDo):
-                    print(toDo.count)
-                    toDo.forEach {self.coreDataMadager.saveTask(id: UUID(), title: "Без категории", details: $0.todo, date: Date.now, isDone: false)}
-                case .failure(let error):
-                    print("Не удалось загрузить данный из API ошибка: \(error)")
+        let isDataLoaded = UserDefaults.standard.bool(forKey: "isDataLoaded")
+        if !isDataLoaded {
+            ToDoLoadService.shared.fetchTodos { [weak self] result in
+                guard let self = self else {return}
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let toDo):
+                        UserDefaults.standard.set(true, forKey: "isDataLoaded")
+                        toDo.forEach {self.coreDataMadager.saveTask(id: UUID(), title: "Без категории", details: $0.todo, date: Date.now, isDone: false)}
+                    case .failure(let error):
+                        print("Не удалось загрузить данный из API ошибка: \(error)")
+                    }
                 }
             }
         }
@@ -168,7 +172,7 @@ final class MainViewController: UIViewController {
         navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
         navigationController?.pushViewController(viewController, animated: true)
     }
-
+    
 }
 
 extension MainViewController: UITableViewDataSource {
@@ -194,6 +198,10 @@ extension MainViewController: CoreDataManagerDelegate {
     func didChangeData(_ data: [Task]) {
         countTask = data
         taskTableView.reloadData()
+        countTaskLabel.text = String.localizedStringWithFormat(
+            NSLocalizedString("numberOfTasks", comment: "подбор формы записи"),
+            countTask.count
+        )
     }
 }
 

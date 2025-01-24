@@ -112,6 +112,52 @@ final class CoreDataManager: NSObject {
         }
         return taskList
     }
+    
+    func deleteAllTasks() {
+        context.perform { [weak self] in
+            let fetchRequest: NSFetchRequest<TaskCD> = TaskCD.fetchRequest()
+            do {
+                let tasks = try self?.context.fetch(fetchRequest)
+                tasks?.forEach { task in
+                    self?.context.delete(task)
+                }
+                try self?.context.save()
+                UserDefaults.standard.set(false, forKey: "isDataLoaded")
+                print("All tasks deleted successfully")
+            } catch {
+                print("Failed to delete all tasks: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func updateTask(id: UUID, title: String?, details: String?, date: Date?, isDone: Bool?) {
+        context.perform { [weak self] in
+            let fetchRequest: NSFetchRequest<TaskCD> = TaskCD.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+            
+            do {
+                if let tasks = try self?.context.fetch(fetchRequest), let task = tasks.first {
+                    if let title = title {
+                        task.title = title
+                    }
+                    if let details = details {
+                        task.details = details
+                    }
+                    if let date = date {
+                        task.date = date
+                    }
+                    if let isDone = isDone {
+                        task.isDone = isDone
+                    }
+                    
+                    try self?.context.save()
+                    print("Task updated successfully")
+                }
+            } catch {
+                print("Failed to update task: \(error.localizedDescription)")
+            }
+        }
+    }
 }
 
 extension CoreDataManager: NSFetchedResultsControllerDelegate {

@@ -30,6 +30,7 @@ final class ToDoLoadService {
             do {
                 let decoder = JSONDecoder()
                 let response = try decoder.decode(ToDoResulte.self, from: data)
+                UserDefaults.standard.set(true, forKey: "isDataLoaded")
                 completion(.success(response.todos))
             } catch {
                 completion(.failure(error))
