@@ -41,6 +41,7 @@ final class MainViewController: UIViewController {
         searchField.leftViewMode = .unlessEditing
         searchField.leftViewMode = .always
         searchField.backgroundColor = .myBackground
+        searchField.addTarget(self, action: #selector(searchTextChanged), for: .editingChanged)
         return searchField
     }()
     
@@ -49,7 +50,6 @@ final class MainViewController: UIViewController {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.register(CustomTableViewCell.self, forCellReuseIdentifier: CustomTableViewCell.identifer)
         tableView.separatorColor = .gray
-        
         tableView.dataSource = self
         tableView.delegate = self
         return tableView
@@ -88,6 +88,8 @@ final class MainViewController: UIViewController {
     
     private var blurView: UIVisualEffectView?
     private var countTask: [Task] = []
+    private var filteredTasks: [Task] = []
+    private var isSearching = false
     
     private let toDoLoadService = ToDoLoadService.shared
     private let coreDataMadager = CoreDataManager.shared
@@ -101,7 +103,6 @@ final class MainViewController: UIViewController {
         setUpUIElements()
         setUpConstraints()
         
-//        coreDataMadager.deleteAllTasks()
         loadData()
     }
     
@@ -176,11 +177,26 @@ final class MainViewController: UIViewController {
         navigationController?.pushViewController(viewController, animated: true)
     }
     
+    @objc
+      private func searchTextChanged() {
+          guard let searchText = searchField.text?.lowercased(), !searchText.isEmpty else {
+              isSearching = false
+              filteredTasks = []
+              taskTableView.reloadData()
+              return
+          }
+          
+          isSearching = true
+          filteredTasks = countTask.filter {
+              $0.title.lowercased().contains(searchText) || $0.description.lowercased().contains(searchText)
+          }
+          taskTableView.reloadData()
+      }
 }
 
 extension MainViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        countTask.count
+        isSearching ? filteredTasks.count : countTask.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -188,7 +204,8 @@ extension MainViewController: UITableViewDataSource {
             assertionFailure("Не удалось выполнить приведение к EventAndHabitTableViewСеll")
             return UITableViewCell()
         }
-        cell.configCell(data: countTask[indexPath.row])
+        let task = isSearching ? filteredTasks[indexPath.row] : countTask[indexPath.row]
+        cell.configCell(data: task)
         return cell
     }
 }
