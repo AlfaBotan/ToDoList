@@ -49,6 +49,7 @@ final class MainViewController: UIViewController {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.register(CustomTableViewCell.self, forCellReuseIdentifier: CustomTableViewCell.identifer)
         tableView.separatorColor = .gray
+        
         tableView.dataSource = self
         tableView.delegate = self
         return tableView

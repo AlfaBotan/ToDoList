@@ -56,6 +56,7 @@ final class CustomTableViewCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: .subtitle, reuseIdentifier: reuseIdentifier)
+        self.selectionStyle = .none
         configureSubviews()
     }
     
@@ -102,14 +103,7 @@ final class CustomTableViewCell: UITableViewCell {
     func configCell(data: Task) {
         taskIsDone = data.isDone
         id = data.id
-        let configuration = UIImage.SymbolConfiguration(pointSize: 25, weight: .regular, scale: .medium)
-        var image = UIImage(systemName: "circle", withConfiguration: configuration)
-        if taskIsDone {
-            image = UIImage(systemName: "checkmark.circle", withConfiguration: configuration)
-        } else {
-            image = UIImage(systemName: "circle", withConfiguration: configuration)
-        }
-        doneButton.setImage(image, for: .normal)
+        configDoneButton()
         titleLabel.text = data.title
         descriptionLabel.text = data.description
         burnDateLabel.text = DateFormatterManager.shared.dateFormatter.string(from: data.date)
@@ -117,14 +111,27 @@ final class CustomTableViewCell: UITableViewCell {
     
     @objc
     private func reverseDoneButtoneState() {
+        guard let id = self.id else {return}
+        taskIsDone.toggle()
+        configDoneButton()
+        CoreDataManager.shared.updateTaskState(id: id, isDone: taskIsDone)
+    }
+    
+    private func configDoneButton() {
+        
         let configuration = UIImage.SymbolConfiguration(pointSize: 25, weight: .regular, scale: .medium)
         var image = UIImage(systemName: "circle", withConfiguration: configuration)
         if taskIsDone {
             image = UIImage(systemName: "circle", withConfiguration: configuration)
+            titleLabel.textColor = .white
+            descriptionLabel.textColor = .white
+            burnDateLabel.textColor = .white
         } else {
             image = UIImage(systemName: "checkmark.circle", withConfiguration: configuration)
+            titleLabel.textColor = .gray
+            descriptionLabel.textColor = .gray
+            burnDateLabel.textColor = .gray
         }
-        taskIsDone.toggle()
         doneButton.setImage(image, for: .normal)
     }
 }
@@ -140,7 +147,7 @@ extension CustomTableViewCell: UIContextMenuInteractionDelegate {
             else {return}
             print("Редактировать задачу: \(id)")
             
-        let editVC = CreateNewTaskViewController()
+            let editVC = CreateNewTaskViewController()
             editVC.configVCForEditFlow(title: title, description: description, id: id)
             
             if let parentViewController = self.findViewController() {

@@ -138,26 +138,15 @@ final class CoreDataManager: NSObject {
         }
     }
     
-    func updateTask(id: UUID, title: String?, details: String?, date: Date?, isDone: Bool?) {
+    func updateTaskState(id: UUID, isDone: Bool) {
         context.perform { [weak self] in
             let fetchRequest: NSFetchRequest<TaskCD> = TaskCD.fetchRequest()
             fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
             
             do {
                 if let tasks = try self?.context.fetch(fetchRequest), let task = tasks.first {
-                    if let title = title {
-                        task.title = title
-                    }
-                    if let details = details {
-                        task.details = details
-                    }
-                    if let date = date {
-                        task.date = date
-                    }
-                    if let isDone = isDone {
-                        task.isDone = isDone
-                    }
-                    
+                       task.isDone = isDone
+                  
                     try self?.context.save()
                     print("Запись обновлена")
                 }
