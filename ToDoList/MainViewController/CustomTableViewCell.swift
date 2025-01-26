@@ -9,7 +9,6 @@ import UIKit
 
 final class CustomTableViewCell: UITableViewCell {
     
-    
     private lazy var doneButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false

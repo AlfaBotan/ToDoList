@@ -119,23 +119,6 @@ final class CoreDataManager: NSObject {
         return taskList
     }
     
-    func deleteAllTasks() {
-        context.perform { [weak self] in
-            let fetchRequest: NSFetchRequest<TaskCD> = TaskCD.fetchRequest()
-            do {
-                let tasks = try self?.context.fetch(fetchRequest)
-                tasks?.forEach { task in
-                    self?.context.delete(task)
-                }
-                try self?.context.save()
-                UserDefaults.standard.set(false, forKey: "isDataLoaded")
-                print("База данных очищена")
-            } catch {
-                print("Ошибка очистки базы данных: \(error.localizedDescription)")
-            }
-        }
-    }
-    
     func updateTaskState(id: UUID, isDone: Bool) {
         context.perform { [weak self] in
             let fetchRequest: NSFetchRequest<TaskCD> = TaskCD.fetchRequest()

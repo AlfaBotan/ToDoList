@@ -100,7 +100,6 @@ final class MainViewController: UIViewController {
         coreDataMadager.configureFetchedResultsController()
         setUpUIElements()
         setUpConstraints()
-//        coreDataMadager.deleteAllTasks()
         loadData()
     }
     
