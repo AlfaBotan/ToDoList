@@ -7,8 +7,6 @@
 
 import CoreData
 
-import CoreData
-
 protocol CoreDataManagerDelegate: AnyObject {
     func didChangeData(_ data: [Task])
 }

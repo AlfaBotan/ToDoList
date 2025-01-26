@@ -96,13 +96,11 @@ final class MainViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         coreDataMadager.delegate = self
         coreDataMadager.configureFetchedResultsController()
-        
         setUpUIElements()
         setUpConstraints()
-        
+//        coreDataMadager.deleteAllTasks()
         loadData()
     }
     
@@ -152,7 +150,7 @@ final class MainViewController: UIViewController {
     private func loadData() {
         let isDataLoaded = UserDefaults.standard.bool(forKey: "isDataLoaded")
         if !isDataLoaded {
-            ToDoLoadService.shared.fetchTodos { [weak self] result in
+            toDoLoadService.fetchTodos { [weak self] result in
                 guard let self = self else {return}
                 DispatchQueue.main.async {
                     switch result {
@@ -216,12 +214,14 @@ extension MainViewController: UITableViewDelegate {
 
 extension MainViewController: CoreDataManagerDelegate {
     func didChangeData(_ data: [Task]) {
-        countTask = data
-        taskTableView.reloadData()
-        countTaskLabel.text = String.localizedStringWithFormat(
-            NSLocalizedString("numberOfTasks", comment: "подбор формы записи"),
-            countTask.count
-        )
+        DispatchQueue.main.async {
+            self.countTask = data
+            self.taskTableView.reloadData()
+            self.countTaskLabel.text = String.localizedStringWithFormat(
+                NSLocalizedString("numberOfTasks", comment: "подбор формы записи"),
+                self.countTask.count
+            )
+        }
     }
 }
 

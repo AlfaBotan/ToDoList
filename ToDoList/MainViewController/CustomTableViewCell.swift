@@ -121,7 +121,7 @@ final class CustomTableViewCell: UITableViewCell {
         
         let configuration = UIImage.SymbolConfiguration(pointSize: 25, weight: .regular, scale: .medium)
         var image = UIImage(systemName: "circle", withConfiguration: configuration)
-        if taskIsDone {
+        if !taskIsDone {
             image = UIImage(systemName: "circle", withConfiguration: configuration)
             titleLabel.textColor = .white
             descriptionLabel.textColor = .white
@@ -145,7 +145,6 @@ extension CustomTableViewCell: UIContextMenuInteractionDelegate {
                   let title = self.titleLabel.text,
                   let description = self.descriptionLabel.text
             else {return}
-            print("Редактировать задачу: \(id)")
             
             let editVC = CreateNewTaskViewController()
             editVC.configVCForEditFlow(title: title, description: description, id: id)
@@ -160,7 +159,6 @@ extension CustomTableViewCell: UIContextMenuInteractionDelegate {
             guard let self = self,
                   let id = self.id
             else {return}
-            print("Удалить задачу: \(id)")
             CoreDataManager.shared.deleteTask(with: id)
         }
         
